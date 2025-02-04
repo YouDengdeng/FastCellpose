@@ -20,13 +20,11 @@ FastCellpose uses nearly the same environment configuration as Cellpose project,
 
 You can check [Cellpose/README.md](https://github.com/MouseLand/cellpose/blob/main/README.md) for more Cellpose's local installation details.
 
-*NOTICE*
-
-*It's worth noticing that for different segmentation tasks, the hyparameters need to be finetuned to achieve better results.*
-
 ## Demo
 
 Before you start your own data training process, we offer a demo project to ensure you have configured the proper environment. 
+
+*It's worth noticing that for different segmentation tasks, the hyparameters need to be finetuned to achieve better results.*
 
 In folder *demo_infer* we prepare a fine-trained model and 2 2048×2048-pixel images. You can run *2_finalspeed_whole_inference.py* and check the inputs/results in:
 
