@@ -24,8 +24,6 @@ You can check [Cellpose/README.md](https://github.com/MouseLand/cellpose/blob/ma
 
 Before you start your own data training process, we offer a demo project to ensure you have configured the proper environment. 
 
-*It's worth noticing that for different segmentation tasks, the hyparameters need to be finetuned to achieve better results.*
-
 In folder *demo_infer* we prepare a fine-trained model and 2 2048×2048-pixel images. You can run *2_finalspeed_whole_inference.py* and check the inputs/results in:
 
 ```
@@ -34,6 +32,8 @@ In folder *demo_infer* we prepare a fine-trained model and 2 2048×2048-pixel im
 ```
 
 ## Own data training
+
+*It's worth noticing that for different segmentation tasks, the hyparameters need to be finetuned to achieve better results.*
 
 FastCellpose requires a sufficient amount of data  to complete its supervised training process. Here we introduce the folders and process to deal with your data(every folder has a demo image, please check them out if you have any problem).
 
