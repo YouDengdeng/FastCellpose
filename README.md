@@ -33,8 +33,6 @@ In folder *demo_infer* we prepare a fine-trained model and 2 2048×2048-pixel im
 
 ## Own data training
 
-*It's worth noticing that for different segmentation tasks, the hyparameters may need to be finetuned to achieve better results.*
-
 FastCellpose requires a sufficient amount of data  to complete its supervised training process. Here we introduce the folders and process to deal with your data(every folder has a demo image, please check them out if you have any problem).
 
 1. Split your data into train and test set, then move them to the corresponding folders: *origin* and *whole_mask*.
@@ -91,7 +89,7 @@ Change in *core.py* line 851
 
 ### base feature channels num of U-Net
 
-Change in *core.py*. there are [16, 32, 64, 128] and [32, 64, 128, 256] to choose in python class: UnetModel
+Change in *core.py*. There are [16, 32, 64, 128] and [32, 64, 128, 256] to choose in python class: UnetModel
 
 ### conv num in every encoder/decoder layer of U-Net
 

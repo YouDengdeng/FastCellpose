@@ -3,9 +3,9 @@ import os
 from cellpose import utils, models
 import torch
 import skimage.io as io
-from super_params_set import parser
+from super_params_set import own_parser
 
-train_args = parser.parse_args()
+train_args = own_parser.parse_args()
 
 data_root = train_args.data_path
 save_path = train_args.model_save

@@ -512,6 +512,7 @@ def reshape_and_normalize_data(train_data, test_data=None, channels=None, normal
     run_test = True
     return train_data, test_data, run_test
 
+
 def resize_image(img0, Ly=None, Lx=None, rsz=None, interpolation=cv2.INTER_LINEAR, no_channels=False):
     """ resize image for computing flows / unresize for computing dynamics
 
@@ -553,7 +554,7 @@ def resize_image(img0, Ly=None, Lx=None, rsz=None, interpolation=cv2.INTER_LINEA
             Ly = int(img0.shape[-3] * rsz[-2])
             Lx = int(img0.shape[-2] * rsz[-1])
     
-    # no_channels useful for z-stacks, sot he third dimension is not treated as a channel
+    # no_channels useful for z-stacks, so the third dimension is not treated as a channel
     # but if this is called for grayscale images, they first become [Ly,Lx,2] so ndim=3 but 
     if (img0.ndim>2 and no_channels) or (img0.ndim==4 and not no_channels):
         if no_channels:

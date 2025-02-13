@@ -10,13 +10,13 @@ from cellpose import models
 import cv2
 import numpy as np
 from tqdm import trange
-from super_params_set import parser
+from super_params_set import own_parser
 
 from cellpose import transforms, utils, dynamics
 from cellpose.models import models_logger
 from score_3 import dice_coef, iou_score
 
-test_args = parser.parse_args()
+test_args = own_parser.parse_args()
 
 # for your own dataset inference,run :
 
@@ -31,16 +31,6 @@ test_args = parser.parse_args()
 
 # for DEMONSTRATION, plz run instead:
 
-# test_img_path = r'H:\Code\Python_code\Fast_Cellpose_prj\demo_infer\img/'
-# mask_img_path = r'H:\Code\Python_code\Fast_Cellpose_prj\demo_infer\mask/'
-# # mask_img_path = None
-# results_path = r'H:\Code\Python_code\Fast_Cellpose_prj\demo_infer\inference_out/'
-# style_on = False
-# residual_on = False
-# concatenation = False
-# model_name = 'demoglo_nbase=32_conv=2'
-# inference_model_name = r'H:\Code\Python_code\Fast_Cellpose_prj\demo_infer\demoglo_nbase=32_conv=2.pth'
-
 test_img_path = r'.\demo_infer\img/'
 mask_img_path = r'.\demo_infer\mask/'
 # mask_img_path = None
@@ -48,8 +38,8 @@ results_path = r'.\demo_infer\inference_out/'
 style_on = False
 residual_on = False
 concatenation = False
-model_name = 'demoglo_nbase=32_conv=2'
-inference_model_name = r'.\demo_infer\demoglo_nbase=32_conv=2.pth'
+model_name = 'demoglo_nbase=16_conv=2'
+inference_model_name = r'.\demo_infer\demoglo_nbase=16_conv=2.pth'
 
 
 log_final = os.path.join(results_path, 'log_prediction.txt')
@@ -70,7 +60,6 @@ os.makedirs(results_path, exist_ok=True)
 
 
 def fulfill(inp):
-
     data = []
     [w, h, channel] = inp.shape
     r = (np.ceil(w / valid_patch) * valid_patch).astype(int) + patch_edge * 2

@@ -5,7 +5,7 @@ import torch.nn as nn
 from torch import optim
 import torch.nn.functional as F
 import datetime
-
+import torch.nn.init as init
 from . import transforms, io, dynamics, utils
 
 sz = 3
@@ -34,50 +34,20 @@ def batchconv0(in_channels, out_channels, sz):
     )
 
 
-# class resup(nn.Module):
-#     def __init__(self, in_channels, out_channels, style_channels, sz, concatenation=False):  # 32,16,128,3,False
-#         super().__init__()
-#         self.conv = nn.Sequential()
-#         self.conv.add_module('conv_0', batchconv(in_channels, out_channels, sz))
-#         self.conv.add_module('conv_1', batchconvstyle(out_channels, out_channels, style_channels, sz,
-#                                                       concatenation=concatenation))
-#         self.conv.add_module('conv_2', batchconvstyle(out_channels, out_channels, style_channels, sz))
-#         self.conv.add_module('conv_3', batchconvstyle(out_channels, out_channels, style_channels, sz))
-#         self.proj = batchconv0(in_channels, out_channels, 1)
-#
-#     def forward(self, x, y, style, mkldnn=False):
-#         x = self.proj(x) + self.conv[1](style, self.conv[0](x), y=y, mkldnn=mkldnn)
-#         x = x + self.conv[3](style, self.conv[2](style, x, mkldnn=mkldnn), mkldnn=mkldnn)
-#         return x
-#
-#
-# class resdown(nn.Module):
-#     def __init__(self, in_channels, out_channels, sz):
-#         super().__init__()
-#         self.conv = nn.Sequential()
-#         self.proj = batchconv0(in_channels, out_channels, 1)
-#         for t in range(4):
-#             if t == 0:
-#                 self.conv.add_module('conv_%d' % t, batchconv(in_channels, out_channels, sz))
-#             else:
-#                 self.conv.add_module('conv_%d' % t, batchconv(out_channels, out_channels, sz))
-#
-#     def forward(self, x):
-#         x = self.proj(x) + self.conv[1](self.conv[0](x))
-#         x = x + self.conv[3](self.conv[2](x))
-#         return x
-
-
 class resup(nn.Module):
-    def __init__(self, in_channels, out_channels, style_channels, sz, concatenation=False):
+    def __init__(self, in_channels, out_channels, style_channels, sz, concatenation=False):  # 32,16,128,3,False
         super().__init__()
         self.conv = nn.Sequential()
         self.conv.add_module('conv_0', batchconv(in_channels, out_channels, sz))
-        self.conv.add_module('conv_1', batchconvstyle(out_channels, out_channels, style_channels, sz, concatenation=concatenation))
+        self.conv.add_module('conv_1', batchconvstyle(out_channels, out_channels, style_channels, sz,
+                                                      concatenation=concatenation))
+        self.conv.add_module('conv_2', batchconvstyle(out_channels, out_channels, style_channels, sz))
+        self.conv.add_module('conv_3', batchconvstyle(out_channels, out_channels, style_channels, sz))
         self.proj = batchconv0(in_channels, out_channels, 1)
 
     def forward(self, x, y, style, mkldnn=False):
         x = self.proj(x) + self.conv[1](style, self.conv[0](x), y=y, mkldnn=mkldnn)
+        x = x + self.conv[3](style, self.conv[2](style, x, mkldnn=mkldnn), mkldnn=mkldnn)
         return x
 
 
@@ -86,7 +56,7 @@ class resdown(nn.Module):
         super().__init__()
         self.conv = nn.Sequential()
         self.proj = batchconv0(in_channels, out_channels, 1)
-        for t in range(2):
+        for t in range(4):
             if t == 0:
                 self.conv.add_module('conv_%d' % t, batchconv(in_channels, out_channels, sz))
             else:
@@ -94,9 +64,39 @@ class resdown(nn.Module):
 
     def forward(self, x):
         x = self.proj(x) + self.conv[1](self.conv[0](x))
+        x = x + self.conv[3](self.conv[2](x))
         return x
 
+
+# class resup(nn.Module):
+#     def __init__(self, in_channels, out_channels, style_channels, sz, concatenation=False):
+#         super().__init__()
+#         self.conv = nn.Sequential()
+#         self.conv.add_module('conv_0', batchconv(in_channels, out_channels, sz))
+#         self.conv.add_module('conv_1', batchconvstyle(out_channels, out_channels, style_channels, sz, concatenation=concatenation))
+#         self.proj = batchconv0(in_channels, out_channels, 1)
 #
+#     def forward(self, x, y, style, mkldnn=False):
+#         x = self.proj(x) + self.conv[1](style, self.conv[0](x), y=y, mkldnn=mkldnn)
+#         return x
+#
+#
+# class resdown(nn.Module):
+#     def __init__(self, in_channels, out_channels, sz):
+#         super().__init__()
+#         self.conv = nn.Sequential()
+#         self.proj = batchconv0(in_channels, out_channels, 1)
+#         for t in range(2):
+#             if t == 0:
+#                 self.conv.add_module('conv_%d' % t, batchconv(in_channels, out_channels, sz))
+#             else:
+#                 self.conv.add_module('conv_%d' % t, batchconv(out_channels, out_channels, sz))
+#
+#     def forward(self, x):
+#         x = self.proj(x) + self.conv[1](self.conv[0](x))
+#         return x
+
+
 # class convup(nn.Module):  # convup(nbase[n], nbase[n - 1], nbase[-1], sz, concatenation)
 #     def __init__(self, in_channels, out_channels, style_channels, sz, concatenation=False):
 #         super().__init__()
@@ -111,6 +111,8 @@ class resdown(nn.Module):
 #         x = self.conv[1](style, self.conv[0](x), y=y, mkldnn=mkldnn)  # style, x, mkldnn=False, y=None
 #         x = self.conv[3](style, self.conv[2](style, x, mkldnn=mkldnn), mkldnn=mkldnn)
 #         return x
+#
+#
 # class convdown(nn.Module):
 #     def __init__(self, in_channels, out_channels, sz):
 #         super().__init__()
@@ -128,50 +130,16 @@ class resdown(nn.Module):
 #         return x
 
 
-# class convup(nn.Module):
-#     def __init__(self, in_channels, out_channels, style_channels, sz, concatenation=False):
-#         super().__init__()
-#         self.conv = nn.Sequential()
-#         self.conv.add_module('conv_0', batchconv(in_channels, out_channels, sz))
-#         self.conv.add_module('conv_1', batchconvstyle(out_channels, out_channels, style_channels, sz,
-#                                                       concatenation=concatenation))
-#
-#     def forward(self, x, y, style, mkldnn=False):
-#         x = self.conv[1](style, self.conv[0](x), y=y)
-#         return x
-# class convdown(nn.Module):
-#     def __init__(self, in_channels, out_channels, sz):
-#         super().__init__()
-#         self.conv = nn.Sequential()
-#         for t in range(2):
-#             if t == 0:
-#                 self.conv.add_module('conv_%d' % t, batchconv(in_channels, out_channels, sz))
-#             else:
-#                 self.conv.add_module('conv_%d' % t, batchconv(out_channels, out_channels, sz))
-#
-#     def forward(self, x):
-#         x = self.conv[0](x)
-#         x = self.conv[1](x)
-#         return x
-
 class convup(nn.Module):
-    def __init__(self, in_channels, out_channels, style_channels, sz, concatenation=False, need2upsample=True):
+    def __init__(self, in_channels, out_channels, style_channels, sz, concatenation=False):
         super().__init__()
         self.conv = nn.Sequential()
-        self.need2up = need2upsample
-        if need2upsample:
-            self.conv.add_module('conv_0', nn.ConvTranspose2d(in_channels, out_channels, 2, stride=2, padding=0))
-            self.conv.add_module('conv_1', batchconvstyle(out_channels, out_channels, style_channels, sz,
-                                                          concatenation=concatenation))
-        else:
-            self.conv.add_module('conv_0', batchconvstyle(in_channels, out_channels, style_channels, sz,
-                                                          concatenation=concatenation))
+        self.conv.add_module('conv_0', batchconv(in_channels, out_channels, sz))
+        self.conv.add_module('conv_1', batchconvstyle(out_channels, out_channels, style_channels, sz,
+                                                      concatenation=concatenation))
 
     def forward(self, x, y, style, mkldnn=False):
-        if self.need2up:
-            x = self.conv[1](style, self.conv[0](x), y=y)
-        else:
-            x = self.conv[0](style, x, y=y)
+        x = self.conv[1](style, self.conv[0](x), y=y)
         return x
 
 
@@ -258,35 +226,27 @@ class make_style(nn.Module):
 class upsample(nn.Module):
     def __init__(self, nbase, sz, residual_on=True, concatenation=False):  # nbase=[16,32,64,128,128]
         super().__init__()
-        # self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
+        self.upsampling = nn.Upsample(scale_factor=2, mode='nearest')
         self.up = nn.Sequential()
         for n in range(1, len(nbase)):
-            need2upsample = True
-            if n == len(nbase) - 1:
-                need2upsample = False
             if residual_on:
                 self.up.add_module('res_up_%d' % (n - 1),
                                    resup(nbase[n], nbase[n - 1], nbase[-1], sz, concatenation))  # 32,16,128,3,False
             else:
                 self.up.add_module('conv_up_%d' % (n - 1),
-                                   convup(nbase[n], nbase[n - 1], nbase[-1], sz, concatenation,
-                                          need2upsample=need2upsample))
-                # nn.ConvTranspose2d(nbase[n], nbase[n], sz, stride=2, padding=0,
-                #                    output_padding=0, groups=1,
-                #                    bias=True, dilation=1)
+                                   convup(nbase[n], nbase[n - 1], nbase[-1], sz, concatenation))
 
     def forward(self, style, xd, mkldnn=False):
         x = self.up[-1](xd[-1], xd[-1], style, mkldnn=mkldnn)
         for n in range(len(self.up) - 2, -1, -1):
-            # if mkldnn:
-            #     x = self.upsampling(x.to_dense()).to_mkldnn()
-            # else:
-            #     x = self.upsampling(x)
+            if mkldnn:
+                x = self.upsampling(x.to_dense()).to_mkldnn()
+            else:
+                x = self.upsampling(x)
             x = self.up[n](x, xd[n], style, mkldnn=mkldnn)
         return x
 
 
-import torch.nn.init as init
 
 
 def weights_init(m):

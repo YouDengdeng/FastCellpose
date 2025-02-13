@@ -4,9 +4,9 @@ from skimage import io
 import torch
 from cellpose import dynamics
 import tifffile
-from super_params_set import parser
+from super_params_set import own_parser
 
-flow_args = parser.parse_args()
+flow_args = own_parser.parse_args()
 data_root = flow_args.data_path
 flow_path = os.path.join(data_root, 'flow/')
 
